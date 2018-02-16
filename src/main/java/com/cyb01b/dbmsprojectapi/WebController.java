@@ -1,11 +1,14 @@
 package com.cyb01b.dbmsprojectapi;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,16 +27,20 @@ public class WebController {
 	@RequestMapping(method = RequestMethod.GET, path = "/hello", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseObject hello(@RequestParam(value="name", defaultValue="World") String name) {
 		String returnString = "Hello, " + name;
-		System.out.print("An unauthenticated user is requesting the hello endpoint; response is: " + returnString);
+		System.out.println("An unauthenticated user is requesting the hello endpoint; response is: " + returnString);
 		ResponseObject responseObject = new ResponseObject();
 		responseObject.setResponseText(returnString);
         return responseObject;
     }
 	
 	// Endpoint that fetches customer information on login
-	@RequestMapping(method = RequestMethod.GET, path = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseObject login(@ModelAttribute RequestObject requestObject) throws Exception {
-		System.out.print("An unauthenticated user is requesting the authenticate endpoint");
+	@RequestMapping(method = RequestMethod.POST, path = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseObject login(@Valid @RequestBody RequestObject requestObject) throws Exception {
+		System.out.println("An unauthenticated user is requesting the authenticate endpoint");
+		
+		if (requestObject == null || requestObject.getUserName() == null)
+			throw new LoginException("User name is null and cannot be authenticated!");
+		
 		ResponseObject responseObject = webService.getLogin(requestObject);
 		return responseObject;
 	}
@@ -44,15 +51,17 @@ public class WebController {
 	@ExceptionHandler(Exception.class) 
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ErrorResponse handle(Exception e) {
+		e.printStackTrace();
 		System.err.println("An exception occurred" + e.getMessage());
-		return new ErrorResponse("An exception occurred" + e.getMessage());
+		return new ErrorResponse("An exception occurred " + e.getMessage());
 	}
 	
 	@ExceptionHandler(LoginException.class) 
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public ErrorResponse handle(LoginException e) {
+		e.printStackTrace();
 		System.err.println("A login exception occurred" + e.getMessage());
-		return new ErrorResponse("A login exception occurred" + e.getMessage());
+		return new ErrorResponse("A login exception occurred " + e.getMessage());
 	}
 	
 }
