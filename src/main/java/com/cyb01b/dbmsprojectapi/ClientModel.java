@@ -2,7 +2,7 @@ package com.cyb01b.dbmsprojectapi;
 
 public class ClientModel {
 	private String userId;
-	private Boolean authenticated;
+	private Boolean authenticated = false;
 	private String response;
 //	private PageData pageData;
 	
