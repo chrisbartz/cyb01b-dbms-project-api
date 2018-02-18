@@ -52,16 +52,16 @@ public class WebController {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ErrorResponse handle(Exception e) {
 		e.printStackTrace();
-		System.err.println("An exception occurred" + e.getMessage());
-		return new ErrorResponse("An exception occurred " + e.getMessage());
+		System.err.println("An exception occurred: " + e.getMessage());
+		return new ErrorResponse("An exception occurred: " + e.getMessage());
 	}
 	
 	@ExceptionHandler(LoginException.class) 
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public ErrorResponse handle(LoginException e) {
 		e.printStackTrace();
-		System.err.println("A login exception occurred" + e.getMessage());
-		return new ErrorResponse("A login exception occurred " + e.getMessage());
+		System.err.println("A login exception occurred: " + e.getMessage());
+		return new ErrorResponse("A login exception occurred: " + e.getMessage());
 	}
 	
 }
