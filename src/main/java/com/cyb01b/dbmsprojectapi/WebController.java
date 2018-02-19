@@ -33,8 +33,9 @@ public class WebController {
         return responseObject;
     }
 	
-	// Endpoint that fetches customer information on login
-	@RequestMapping(method = RequestMethod.POST, path = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+	// Endpoint that fetches customer information on login, returns landing page
+	@CrossOrigin
+	@RequestMapping(method = RequestMethod.POST, path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseObject login(@Valid @RequestBody RequestObject requestObject) throws Exception {
 		System.out.println("An unauthenticated user is requesting the authenticate endpoint");
 		

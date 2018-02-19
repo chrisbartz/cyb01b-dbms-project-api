@@ -3,6 +3,7 @@ package com.cyb01b.dbmsprojectapi;
 public class ResponseObject {
 	private String responseText;
 	private Customer customer; 
+	private PageData pageData;
 
 	public String getResponseText() {
 		return responseText;
@@ -18,6 +19,14 @@ public class ResponseObject {
 
 	public void setCustomer(Customer customer) {
 		this.customer = customer;
+	}
+
+	public PageData getPageData() {
+		return pageData;
+	}
+
+	public void setPageData(PageData pageData) {
+		this.pageData = pageData;
 	}
 
 }

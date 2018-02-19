@@ -23,7 +23,7 @@ public class WebService {
 		
 		// Customer is authenticated here - send the page data
 		PageData landingPage = webDao.getLandingPageData();
-		customer.setPageData(landingPage);
+		responseObject.setPageData(landingPage);
 		
 		return responseObject;
 	}

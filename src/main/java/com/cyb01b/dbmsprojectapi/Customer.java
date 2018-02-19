@@ -9,7 +9,6 @@ public class Customer {
 	private String firstName;
 	private String emailAddress;
 	private List<Address> addresses;
-	private PageData pageData;
 	
 	public Integer getCustomerId() {
 		return customerId;
@@ -47,12 +46,5 @@ public class Customer {
 	public void setAddresses(List<Address> addresses) {
 		this.addresses = addresses;
 	}
-	public PageData getPageData() {
-		return pageData;
-	}
-	public void setPageData(PageData pageData) {
-		this.pageData = pageData;
-	}
-
-
+	
 }
