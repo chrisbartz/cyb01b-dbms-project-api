@@ -62,7 +62,7 @@ public class WebController {
 	public ErrorResponse handle(LoginException e) {
 		e.printStackTrace();
 		System.err.println("A login exception occurred: " + e.getMessage());
-		return new ErrorResponse("A login exception occurred: " + e.getMessage());
+		return new ErrorResponse("Login failed: " + e.getMessage());
 	}
 	
 }

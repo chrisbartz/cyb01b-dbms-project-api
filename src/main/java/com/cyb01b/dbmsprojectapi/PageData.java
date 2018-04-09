@@ -1,13 +1,16 @@
 package com.cyb01b.dbmsprojectapi;
 
+import java.util.ArrayList;
+
 public class PageData {
-	private String testString;
+	private ArrayList<Item> items;
 
-	public String getTestString() {
-		return testString;
+	public ArrayList<Item> getItems() {
+		return items;
 	}
 
-	public void setTestString(String testString) {
-		this.testString = testString;
+	public void setItems(ArrayList<Item> items) {
+		this.items = items;
 	}
+	
 }
