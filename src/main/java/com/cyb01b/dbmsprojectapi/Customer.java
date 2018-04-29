@@ -9,6 +9,7 @@ public class Customer {
 	private String firstName;
 	private String emailAddress;
 	private List<Address> addresses;
+	private List<Payment> payments;
 	
 	public Integer getCustomerId() {
 		return customerId;
@@ -45,6 +46,12 @@ public class Customer {
 	}
 	public void setAddresses(List<Address> addresses) {
 		this.addresses = addresses;
+	}
+	public List<Payment> getPayments() {
+		return payments;
+	}
+	public void setPayments(List<Payment> payments) {
+		this.payments = payments;
 	}
 	
 }

@@ -24,6 +24,9 @@ public class WebDao {
 		String sqlAddress = "select * from cyb01b_dbms_project_database.customer c "
 				+ "left outer join cyb01b_dbms_project_database.address a on c.customer_id = a.customer_id "
 				+ "where lower(c.user_name) = lower(?) ";
+		String sqlPayment = "select * from cyb01b_dbms_project_database.customer c "
+				+ "left outer join cyb01b_dbms_project_database.payment p on c.customer_id = p.customer_id "
+				+ "where lower(c.user_name) = lower(?) ";
 
 		Customer customer = null;
 		List<Address> addresses = new ArrayList<Address>();
@@ -87,6 +90,39 @@ public class WebDao {
 		} 
 		
 		customer.setAddresses(addresses);
+		
+		System.out.println("WebDao: executing sql: " + sqlPayment);
+		
+		List<Payment> payments = new ArrayList<Payment>();
+		
+		try {
+			if (connection.isClosed())
+				connection = datasource.getConnection();
+			
+			PreparedStatement ps = connection.prepareStatement(sqlPayment);
+			ps.setString(1, userName);
+			ResultSet rs = ps.executeQuery();
+				
+			while (rs.next()) {
+				Payment payment = new Payment();
+				payment.setPaymentId(rs.getInt("payment_id"));
+				payment.setCustomerId(rs.getInt("customer_id"));
+				payment.setCardNumber(rs.getDouble("card_number"));
+				payment.setName(rs.getString("name"));
+				payment.setExpirationDate(rs.getString("exp_date"));
+				payment.setCvv(rs.getDouble("cvv"));
+				
+				payments.add(payment);
+			}
+			
+			rs.close();
+			ps.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} 
+		
+		customer.setPayments(payments);
 
 		return customer;
 	}
@@ -105,7 +141,7 @@ public class WebDao {
 		
 		String sqlSearch = "select * from cyb01b_dbms_project_database.item "
 				+ (searchTerm != null ? 
-				"where name like '%?%' order by name " 
+				"where name like '%" + searchTerm + "%' order by name " 
 				: 
 				"order by rand() ");
 		
@@ -119,7 +155,7 @@ public class WebDao {
 		try {
 			connection = datasource.getConnection();
 			PreparedStatement ps = connection.prepareStatement(sqlSearch);
-			if (searchTerm != null) ps.setString(1, searchTerm);
+//			if (searchTerm != null) ps.setString(1, searchTerm);
 			ResultSet rs = ps.executeQuery();
 			
 			while (rs.next()) {
@@ -193,6 +229,140 @@ public class WebDao {
 			}
 		}
 		
+		return pageData;
+	}
+	
+	public PageData submitOrder(RequestObject requestObject, ResponseObject responseObject, String userName) {
+		PageData pageData = responseObject.getPageData();
+		
+		String sqlNewOrderId = "select max(order_id) + 1 as new_order_id from cyb01b_dbms_project_database.order";
+		
+		Connection connection = null;
+
+		System.out.println("WebDao: processing request for customer_id " + userName);
+		System.out.println("WebDao: executing sql: " + sqlNewOrderId);
+		
+		int newOrderId = 0;
+		
+		try {
+			connection = datasource.getConnection();
+			PreparedStatement ps = connection.prepareStatement(sqlNewOrderId);
+			ResultSet rs = ps.executeQuery();
+			
+			if (rs.next()) 
+				newOrderId = rs.getInt("new_order_id");
+				
+			rs.close();
+			ps.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} 
+	
+		String sqlInsertOrder = "insert into cyb01b_dbms_project_database.order " + 
+				"(order_id, customer_id, date, address_id, payment_id, total, status) " + 
+				"values " + 
+				"(?, ?, current_date, ?, ?, ?, 'new') ";
+
+		System.out.println("WebDao: executing sql: " + sqlInsertOrder);
+		
+		try {
+			connection = datasource.getConnection();
+			
+			{
+				PreparedStatement ps = connection.prepareStatement(sqlInsertOrder);
+				int i = 1;
+
+				ps.setInt(i++, newOrderId);
+				ps.setString(i++, requestObject.getUserName());
+//				ps.setInt(i++, address_id);
+//				ps.setInt(i++, payment_id);
+//				ps.setDouble(i++, total);
+				ps.setString(i++, "new");
+				
+				ps.executeUpdate();
+				ps.close();
+			}
+			
+			List<Item> items = requestObject.getOrderItems();
+			
+			for (Item item : items) {
+				int i = 1;
+				
+//				ps.setInt(i++, newOrderId);
+//				ps.setString(i++, requestObject.getUserName());
+//				ps.setInt(i++, address_id); 
+//				ps.setInt(i++, payment_id);
+//				ps.setDouble(i++, total);
+//				ps.setString(i++, "new");
+//				
+//				ps.addBatch();
+			}
+			
+			
+			
+//			ps.executeUpdate();
+			
+			
+//		ps.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} 
+		
+		
+	
+//		if (customer == null)
+//			throw new LoginException("Customer " + userName + " was not authenticated succesfully");
+		
+		
+		
+//		StringJoiner sj = new StringJoiner(",");
+//		
+//		for (Item item : items) {
+//			sj.add(String.valueOf(item.getItemId()));
+//		}
+//		
+//		String sqlPictures = "select * " + 
+//				"from cyb01b_dbms_project_database.picture " + 
+//				"where item_id in (" + sj.toString() + ") " +
+//				"order by item_id, file_name ";
+//		
+//		System.out.println("WebDao: executing sql: " + sqlPictures + " " + sj.toString());
+//	
+//		ArrayList<Picture> pictures = new ArrayList<Picture>();
+//		
+//		try {
+////			connection = datasource.getConnection();
+//			PreparedStatement ps = connection.prepareStatement(sqlPictures);
+////			ps.setString(1, sj.toString());
+//			ResultSet rs = ps.executeQuery();
+//				
+//			while (rs.next()) {
+//				Picture picture = new Picture();				
+//				picture.setItemId(rs.getInt("item_id"));
+//				picture.setPictureId(rs.getInt("picture_id"));
+//				picture.setFileName(rs.getString("file_name"));
+//				
+//				pictures.add(picture);
+//			}
+//			
+//			rs.close();
+//			ps.close();
+//			
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} 
+//		
+//		// insert pictures into item
+//		for (Picture picture : pictures) {
+//			for (Item item : items) {
+//				if (picture.getItemId() == item.getItemId()) {
+//					item.getPictures().add(picture);
+//				}
+//			}
+//		}
+//		
 		return pageData;
 	}
 
