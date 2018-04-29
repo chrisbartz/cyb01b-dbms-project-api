@@ -336,5 +336,79 @@ public class WebDao {
 		
 		return pageData;
 	}
+	
+	public List<Order> getOrderHistory(String userName) {
+		
+		String sqlOrderHistory = "select * from cyb01b_dbms_project_database.customer c " + 
+				"left outer join cyb01b_dbms_project_database.order o on c.customer_id = o.customer_id " + 
+				"left outer join cyb01b_dbms_project_database.order_item oi on o.order_id = oi.order_id " + 
+				"left outer join cyb01b_dbms_project_database.item i on oi.item_id = i.item_id " + 
+				"where lower(c.user_name) = lower(?) " +
+				"order by o.order_id desc";
+		
+		Connection connection = null;
+
+		System.out.println("WebDao: processing order history request for customer_id " + userName);
+		System.out.println("WebDao: executing sql: " + sqlOrderHistory);
+	
+		List<Order> orders = new ArrayList<Order>();
+		
+		try {
+			connection = datasource.getConnection();
+			PreparedStatement ps = connection.prepareStatement(sqlOrderHistory);
+			
+			ps.setString(1, userName);
+			
+			Order order = null;
+			int orderId = -1;
+			
+			ResultSet rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				if (orderId != rs.getInt("order_id")) {
+					
+					// create new order object for each new order id
+					orderId = rs.getInt("order_id");
+					
+					if (order != null)
+						orders.add(order);
+					
+					order = new Order();
+					order.setOrderId(rs.getInt("order_id"));
+					order.setAddressId(rs.getInt("address_id"));
+					order.setCustomerId(rs.getInt("customer_id"));
+					order.setDate(rs.getDate("date"));
+					order.setPaymentId(rs.getInt("payment_id"));
+					order.setStatus(rs.getString("status"));
+					order.setTotal(rs.getDouble("total"));
+					order.setOrderItems(new ArrayList<OrderItem>());
+				}
+				
+				OrderItem orderItem = new OrderItem();
+				
+				orderItem.setOrderId(rs.getInt("order_id"));
+				orderItem.setItemId(rs.getInt("item_id"));
+				orderItem.setQuantity(rs.getInt("qty"));
+				
+				Item item = new Item();
+				item.setItemId(rs.getInt("item_id"));
+				item.setCost(rs.getDouble("cost"));
+				item.setDescription(rs.getString("description"));
+				item.setName(rs.getString("name"));
+				
+				orderItem.setItem(item);
+				
+				order.getOrderItems().add(orderItem);
+			}
+			
+			rs.close();
+			ps.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} 
+		
+		return orders;
+	}
 
 }

@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class Order {
 	private int orderId;
-	private String customerId;
+	private int customerId;
 	private Date date;
 	private int addressId;
 	private int paymentId;
@@ -24,12 +24,6 @@ public class Order {
 	}
 	public void setOrderId(int orderId) {
 		this.orderId = orderId;
-	}
-	public String getCustomerId() {
-		return customerId;
-	}
-	public void setCustomerId(String customerId) {
-		this.customerId = customerId;
 	}
 	public Date getDate() {
 		return date;
@@ -60,6 +54,12 @@ public class Order {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public int getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(int customerId) {
+		this.customerId = customerId;
 	}
 	
 	

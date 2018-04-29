@@ -4,7 +4,7 @@ public class OrderItem {
 	private int orderId;
 	private int itemId;
 	private int quantity;
-	
+	private Item item;
 	
 	public int getOrderId() {
 		return orderId;
@@ -23,6 +23,12 @@ public class OrderItem {
 	}
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+	public Item getItem() {
+		return item;
+	}
+	public void setItem(Item item) {
+		this.item = item;
 	}
 	
 }

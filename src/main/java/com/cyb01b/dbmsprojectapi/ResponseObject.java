@@ -1,9 +1,12 @@
 package com.cyb01b.dbmsprojectapi;
 
+import java.util.List;
+
 public class ResponseObject {
 	private String responseText;
 	private Customer customer; 
 	private PageData pageData;
+	private List<Order> orders;
 
 	public String getResponseText() {
 		return responseText;
@@ -27,6 +30,14 @@ public class ResponseObject {
 
 	public void setPageData(PageData pageData) {
 		this.pageData = pageData;
+	}
+
+	public List<Order> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(List<Order> orders) {
+		this.orders = orders;
 	}
 
 }

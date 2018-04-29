@@ -1,5 +1,7 @@
 package com.cyb01b.dbmsprojectapi;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ public class WebService {
 		// Customer is authenticated here - send the page data
 		PageData landingPage = webDao.getLandingPageData(requestObject.getUserName());
 		responseObject.setPageData(landingPage);
+		
+		responseObject.setOrders(getOrderHistory(requestObject.getUserName()));
 		
 		return responseObject;
 	}
@@ -53,6 +57,8 @@ public class WebService {
 		PageData landingPage = webDao.getLandingPageData(requestObject.getUserName());
 		responseObject.setPageData(landingPage);
 		
+		responseObject.setOrders(getOrderHistory(requestObject.getUserName()));
+		
 		return responseObject;
 	}
 	
@@ -64,7 +70,13 @@ public class WebService {
 		// Customer has submitted an order - persist it
 		webDao.submitOrder(requestObject, responseObject, requestObject.getUserName());
 		
+		responseObject.setOrders(getOrderHistory(requestObject.getUserName()));
+		
 		return responseObject;
+	}
+	
+	public List<Order> getOrderHistory(String userName) {
+		return webDao.getOrderHistory(userName);
 	}
 
 }
