@@ -1,5 +1,7 @@
 package com.cyb01b.dbmsprojectapi;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +12,7 @@ import java.util.StringJoiner;
 
 import javax.sql.DataSource;
 
+import org.junit.experimental.results.PrintableResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -232,8 +235,10 @@ public class WebDao {
 		return pageData;
 	}
 	
-	public PageData submitOrder(RequestObject requestObject, ResponseObject responseObject, String userName) {
+	public PageData submitOrder(RequestObject requestObject, ResponseObject responseObject, String userName) throws SubmitOrderException {
 		PageData pageData = responseObject.getPageData();
+		
+		// First get the new order id for insertion into order, order_item tables 
 		
 		String sqlNewOrderId = "select max(order_id) + 1 as new_order_id from cyb01b_dbms_project_database.order";
 		
@@ -258,111 +263,77 @@ public class WebDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} 
-	
-		String sqlInsertOrder = "insert into cyb01b_dbms_project_database.order " + 
-				"(order_id, customer_id, date, address_id, payment_id, total, status) " + 
-				"values " + 
-				"(?, ?, current_date, ?, ?, ?, 'new') ";
-
-		System.out.println("WebDao: executing sql: " + sqlInsertOrder);
 		
 		try {
+			
+			// Second insert the items and total the order
+			
 			connection = datasource.getConnection();
+			
+			String sqlInsertItems = "insert into cyb01b_dbms_project_database.order_item " + 
+					"(order_id, item_id, qty) " + 
+					"values " + 
+					"(?, ?, ?) ";
+			
+			List<Item> items = requestObject.getOrderItems();
+			
+			Double totalCost = 0D;
+
+			{
+				PreparedStatement ps = connection.prepareStatement(sqlInsertItems);
+				
+				for (Item item : items) {
+					int i = 1;
+
+					ps.setInt(i++, newOrderId);
+					ps.setInt(i++, item.getItemId());
+					ps.setInt(i++, item.getQty());
+
+					ps.executeUpdate();
+					
+					totalCost += item.getCost() * item.getQty();
+				}
+				
+				
+				ps.close();
+			}
+			
+			// Lastly, insert the order now that we have totaled our items' cost
+			
+			String sqlInsertOrder = "insert into cyb01b_dbms_project_database.order " + 
+					"(order_id, customer_id, date, address_id, payment_id, total, status) " + 
+					"values " + 
+					"(?, ?, current_time, ?, ?, ?, 'new') ";
+			
+			System.out.println("WebDao: executing sql: " + sqlInsertOrder);
 			
 			{
 				PreparedStatement ps = connection.prepareStatement(sqlInsertOrder);
 				int i = 1;
 
 				ps.setInt(i++, newOrderId);
-				ps.setString(i++, requestObject.getUserName());
-//				ps.setInt(i++, address_id);
-//				ps.setInt(i++, payment_id);
-//				ps.setDouble(i++, total);
-				ps.setString(i++, "new");
+				ps.setString(i++, requestObject.getUserId());
+				ps.setInt(i++, requestObject.getAddressId());
+				ps.setInt(i++, requestObject.getPaymentId());
+				ps.setDouble(i++, totalCost);
 				
 				ps.executeUpdate();
 				ps.close();
 			}
 			
-			List<Item> items = requestObject.getOrderItems();
-			
-			for (Item item : items) {
-				int i = 1;
-				
-//				ps.setInt(i++, newOrderId);
-//				ps.setString(i++, requestObject.getUserName());
-//				ps.setInt(i++, address_id); 
-//				ps.setInt(i++, payment_id);
-//				ps.setDouble(i++, total);
-//				ps.setString(i++, "new");
-//				
-//				ps.addBatch();
-			}
-			
-			
-			
-//			ps.executeUpdate();
-			
-			
-//		ps.close();
+			connection.close();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+			
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			String stackTrace = sw.toString();
+			
+			throw new SubmitOrderException("Something failed during order submission");
 		} 
 		
-		
-	
-//		if (customer == null)
-//			throw new LoginException("Customer " + userName + " was not authenticated succesfully");
-		
-		
-		
-//		StringJoiner sj = new StringJoiner(",");
-//		
-//		for (Item item : items) {
-//			sj.add(String.valueOf(item.getItemId()));
-//		}
-//		
-//		String sqlPictures = "select * " + 
-//				"from cyb01b_dbms_project_database.picture " + 
-//				"where item_id in (" + sj.toString() + ") " +
-//				"order by item_id, file_name ";
-//		
-//		System.out.println("WebDao: executing sql: " + sqlPictures + " " + sj.toString());
-//	
-//		ArrayList<Picture> pictures = new ArrayList<Picture>();
-//		
-//		try {
-////			connection = datasource.getConnection();
-//			PreparedStatement ps = connection.prepareStatement(sqlPictures);
-////			ps.setString(1, sj.toString());
-//			ResultSet rs = ps.executeQuery();
-//				
-//			while (rs.next()) {
-//				Picture picture = new Picture();				
-//				picture.setItemId(rs.getInt("item_id"));
-//				picture.setPictureId(rs.getInt("picture_id"));
-//				picture.setFileName(rs.getString("file_name"));
-//				
-//				pictures.add(picture);
-//			}
-//			
-//			rs.close();
-//			ps.close();
-//			
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		} 
-//		
-//		// insert pictures into item
-//		for (Picture picture : pictures) {
-//			for (Item item : items) {
-//				if (picture.getItemId() == item.getItemId()) {
-//					item.getPictures().add(picture);
-//				}
-//			}
-//		}
-//		
 		return pageData;
 	}
 
