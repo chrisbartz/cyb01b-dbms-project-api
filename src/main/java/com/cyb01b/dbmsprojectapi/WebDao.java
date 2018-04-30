@@ -39,7 +39,9 @@ public class WebDao {
 		System.out.println("WebDao: executing sql: " + sqlCustomer);
 	
 		try {
-			connection = datasource.getConnection();
+			if (null == connection || connection.isClosed())
+				connection = datasource.getConnection();
+			
 			PreparedStatement ps = connection.prepareStatement(sqlCustomer);
 			ps.setString(1, userName);
 			ResultSet rs = ps.executeQuery();
@@ -66,7 +68,7 @@ public class WebDao {
 		System.out.println("WebDao: executing sql: " + sqlAddress);
 		
 		try {
-			if (connection.isClosed())
+			if (null == connection || connection.isClosed())
 				connection = datasource.getConnection();
 			
 			PreparedStatement ps = connection.prepareStatement(sqlAddress);
@@ -99,7 +101,7 @@ public class WebDao {
 		List<Payment> payments = new ArrayList<Payment>();
 		
 		try {
-			if (connection.isClosed())
+			if (null == connection || connection.isClosed())
 				connection = datasource.getConnection();
 			
 			PreparedStatement ps = connection.prepareStatement(sqlPayment);
@@ -146,7 +148,7 @@ public class WebDao {
 				+ (searchTerm != null ? 
 				"where name like '%" + searchTerm + "%' order by name " 
 				: 
-				"order by rand() ");
+				"order by rand() limit 4 ");
 		
 		Connection connection = null;
 
@@ -156,7 +158,9 @@ public class WebDao {
 		ArrayList<Item> items = new ArrayList<Item>();
 		
 		try {
-			connection = datasource.getConnection();
+			if (null == connection || connection.isClosed())
+				connection = datasource.getConnection();
+			
 			PreparedStatement ps = connection.prepareStatement(sqlSearch);
 //			if (searchTerm != null) ps.setString(1, searchTerm);
 			ResultSet rs = ps.executeQuery();
@@ -202,7 +206,6 @@ public class WebDao {
 		ArrayList<Picture> pictures = new ArrayList<Picture>();
 		
 		try {
-//			connection = datasource.getConnection();
 			PreparedStatement ps = connection.prepareStatement(sqlPictures);
 //			ps.setString(1, sj.toString());
 			ResultSet rs = ps.executeQuery();
@@ -218,6 +221,7 @@ public class WebDao {
 			
 			rs.close();
 			ps.close();
+			connection.close();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -250,7 +254,8 @@ public class WebDao {
 		int newOrderId = 0;
 		
 		try {
-			connection = datasource.getConnection();
+			if (null == connection || connection.isClosed())
+				connection = datasource.getConnection();
 			PreparedStatement ps = connection.prepareStatement(sqlNewOrderId);
 			ResultSet rs = ps.executeQuery();
 			
@@ -267,8 +272,8 @@ public class WebDao {
 		try {
 			
 			// Second insert the items and total the order
-			
-			connection = datasource.getConnection();
+			if (null == connection || connection.isClosed())
+				connection = datasource.getConnection();
 			
 			String sqlInsertItems = "insert into cyb01b_dbms_project_database.order_item " + 
 					"(order_id, item_id, qty) " + 
@@ -354,7 +359,9 @@ public class WebDao {
 		List<Order> orders = new ArrayList<Order>();
 		
 		try {
-			connection = datasource.getConnection();
+			if (null == connection || connection.isClosed())
+				connection = datasource.getConnection();
+			
 			PreparedStatement ps = connection.prepareStatement(sqlOrderHistory);
 			
 			ps.setString(1, userName);
